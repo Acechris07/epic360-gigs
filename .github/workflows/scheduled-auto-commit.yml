@@ -1,0 +1,49 @@
+name: Scheduled Auto Commit
+
+on:
+  schedule:
+    # Run every day at 2 AM UTC
+    - cron: '0 2 * * *'
+  workflow_dispatch: # Allow manual triggering
+
+jobs:
+  scheduled-commit:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Update timestamp file
+        run: |
+          echo "Last updated: $(date -u)" > .last-updated.txt
+          echo "Build timestamp: $(date -u +%s)" >> .last-updated.txt
+
+      - name: Auto commit and push
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+
+          # Always commit the timestamp update
+          git add .last-updated.txt
+          git commit -m "Auto-commit: Update timestamp [skip ci]" || exit 0
+
+          # Check for other changes
+          if [[ -n "$(git status --porcelain)" ]]; then
+            git add .
+            git commit -m "Auto-commit: Update project files [skip ci]"
+          fi
+
+          git push
