@@ -1,206 +1,331 @@
-"use client"
+'use client';
 
-import { Phone, MessageCircle, Mail, Clock, MapPin, Headphones } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
+import { useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
+import { Badge } from '@/components/ui/badge';
+import {
+  Mail,
+  Phone,
+  MapPin,
+  Clock,
+  MessageSquare,
+  Send,
+  CheckCircle,
+  AlertCircle,
+  Building,
+  Users,
+  Globe,
+  Shield,
+} from 'lucide-react';
 
 export default function ContactPage() {
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    subject: '',
+    message: '',
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitStatus, setSubmitStatus] = useState<
+    'idle' | 'success' | 'error'
+  >('idle');
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+
+    // Simulate form submission
+    setTimeout(() => {
+      setIsSubmitting(false);
+      setSubmitStatus('success');
+      setFormData({ name: '', email: '', subject: '', message: '' });
+
+      // Reset status after 3 seconds
+      setTimeout(() => setSubmitStatus('idle'), 3000);
+    }, 2000);
+  };
+
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50">
-      {/* Header Section */}
-      <div className="bg-white border-b">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <div className="bg-gradient-to-r from-green-600 to-green-800 text-white py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <h1 className="text-4xl font-bold text-gray-900 mb-4">Get in Touch</h1>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              We're here to help! Whether you have questions, need support, or want to share feedback, our team is ready
-              to assist you every step of the way.
+            <h1 className="text-4xl font-bold mb-4">Contact Us</h1>
+            <p className="text-xl text-green-100">
+              Get in touch with our team. We're here to help!
             </p>
           </div>
         </div>
       </div>
 
-      {/* Contact Options */}
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {/* Phone Support */}
-          <Card className="relative overflow-hidden group hover:shadow-xl transition-all duration-300">
-            <div className="absolute inset-0 bg-gradient-to-br from-green-500/5 to-green-600/10 group-hover:from-green-500/10 group-hover:to-green-600/20 transition-all duration-300"></div>
-            <CardHeader className="relative">
-              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4 group-hover:bg-green-200 transition-colors">
-                <Phone className="w-8 h-8 text-green-600" />
-              </div>
-              <CardTitle className="text-2xl font-bold text-gray-900">Call Us</CardTitle>
-              <CardDescription className="text-gray-600">
-                Speak directly with our support team for immediate assistance
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="relative space-y-4">
-              <div className="space-y-2">
-                <div className="flex items-center space-x-3">
-                  <Phone className="w-5 h-5 text-green-600" />
-                  <span className="text-lg font-semibold text-gray-900">+1 (555) 123-4567</span>
-                </div>
-                <div className="flex items-center space-x-3">
-                  <Clock className="w-5 h-5 text-gray-500" />
-                  <span className="text-sm text-gray-600">Mon-Fri: 9AM-6PM PST</span>
-                </div>
-              </div>
-              <Button
-                className="w-full bg-green-600 hover:bg-green-700 text-white"
-                onClick={() => window.open("tel:+15551234567")}
-              >
-                <Phone className="w-4 h-4 mr-2" />
-                Call Now
-              </Button>
-              <div className="flex justify-center">
-                <Badge variant="secondary" className="text-xs">
-                  Average wait time: 2 minutes
-                </Badge>
-              </div>
-            </CardContent>
-          </Card>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+          {/* Contact Form */}
+          <div>
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2">
+                  <MessageSquare className="h-6 w-6 text-green-600" />
+                  <span>Send us a Message</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {submitStatus === 'success' && (
+                  <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg flex items-center space-x-2">
+                    <CheckCircle className="h-5 w-5 text-green-600" />
+                    <span className="text-green-800">
+                      Message sent successfully! We'll get back to you soon.
+                    </span>
+                  </div>
+                )}
 
-          {/* Live Chat */}
-          <Card className="relative overflow-hidden group hover:shadow-xl transition-all duration-300">
-            <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-blue-600/10 group-hover:from-blue-500/10 group-hover:to-blue-600/20 transition-all duration-300"></div>
-            <CardHeader className="relative">
-              <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-4 group-hover:bg-blue-200 transition-colors">
-                <MessageCircle className="w-8 h-8 text-blue-600" />
-              </div>
-              <CardTitle className="text-2xl font-bold text-gray-900">Live Chat</CardTitle>
-              <CardDescription className="text-gray-600">
-                Get instant help through our real-time messaging system
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="relative space-y-4">
-              <div className="space-y-2">
-                <div className="flex items-center space-x-3">
-                  <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
-                  <span className="text-sm font-medium text-gray-900">Support team online</span>
-                </div>
-                <div className="flex items-center space-x-3">
-                  <Clock className="w-5 h-5 text-gray-500" />
-                  <span className="text-sm text-gray-600">Available 24/7</span>
-                </div>
-              </div>
-              <Button
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white"
-                onClick={() => {
-                  // In a real app, this would open a chat widget
-                  alert("Live chat feature coming soon! Please use phone or email for now.")
-                }}
-              >
-                <MessageCircle className="w-4 h-4 mr-2" />
-                Start Chat
-              </Button>
-              <div className="flex justify-center">
-                <Badge variant="secondary" className="text-xs">
-                  Instant response
-                </Badge>
-              </div>
-            </CardContent>
-          </Card>
+                {submitStatus === 'error' && (
+                  <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-center space-x-2">
+                    <AlertCircle className="h-5 w-5 text-red-600" />
+                    <span className="text-red-800">
+                      Something went wrong. Please try again.
+                    </span>
+                  </div>
+                )}
 
-          {/* Email Support */}
-          <Card className="relative overflow-hidden group hover:shadow-xl transition-all duration-300">
-            <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-purple-600/10 group-hover:from-purple-500/10 group-hover:to-purple-600/20 transition-all duration-300"></div>
-            <CardHeader className="relative">
-              <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mb-4 group-hover:bg-purple-200 transition-colors">
-                <Mail className="w-8 h-8 text-purple-600" />
-              </div>
-              <CardTitle className="text-2xl font-bold text-gray-900">Email Us</CardTitle>
-              <CardDescription className="text-gray-600">
-                Send us a detailed message and we'll get back to you soon
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="relative space-y-4">
-              <div className="space-y-2">
-                <div className="flex items-center space-x-3">
-                  <Mail className="w-5 h-5 text-purple-600" />
-                  <span className="text-sm font-medium text-gray-900">support@epic360gigs.com</span>
-                </div>
-                <div className="flex items-center space-x-3">
-                  <Clock className="w-5 h-5 text-gray-500" />
-                  <span className="text-sm text-gray-600">Response within 24 hours</span>
-                </div>
-              </div>
-              <Button
-                className="w-full bg-purple-600 hover:bg-purple-700 text-white"
-                onClick={() => window.open("mailto:support@epic360gigs.com?subject=Support Request")}
-              >
-                <Mail className="w-4 h-4 mr-2" />
-                Send Email
-              </Button>
-              <div className="flex justify-center">
-                <Badge variant="secondary" className="text-xs">
-                  Detailed support
-                </Badge>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+                <form onSubmit={handleSubmit} className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="name">Full Name *</Label>
+                      <Input
+                        id="name"
+                        name="name"
+                        type="text"
+                        required
+                        value={formData.name}
+                        onChange={handleInputChange}
+                        placeholder="Your full name"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="email">Email Address *</Label>
+                      <Input
+                        id="email"
+                        name="email"
+                        type="email"
+                        required
+                        value={formData.email}
+                        onChange={handleInputChange}
+                        placeholder="your.email@example.com"
+                      />
+                    </div>
+                  </div>
 
-        {/* Additional Information */}
-        <div className="mt-16 bg-white rounded-2xl shadow-lg p-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {/* Office Information */}
-            <div className="space-y-6">
-              <div className="flex items-center space-x-3">
-                <MapPin className="w-6 h-6 text-green-600" />
-                <h3 className="text-xl font-semibold text-gray-900">Our Office</h3>
-              </div>
-              <div className="space-y-2 text-gray-600">
-                <p>Epic360 Gigs Headquarters</p>
-                <p>123 Innovation Drive, Suite 400</p>
-                <p>San Francisco, CA 94105</p>
-                <p>United States</p>
-              </div>
-            </div>
+                  <div>
+                    <Label htmlFor="subject">Subject *</Label>
+                    <Input
+                      id="subject"
+                      name="subject"
+                      type="text"
+                      required
+                      value={formData.subject}
+                      onChange={handleInputChange}
+                      placeholder="What can we help you with?"
+                    />
+                  </div>
 
-            {/* Support Hours */}
-            <div className="space-y-6">
-              <div className="flex items-center space-x-3">
-                <Headphones className="w-6 h-6 text-blue-600" />
-                <h3 className="text-xl font-semibold text-gray-900">Support Hours</h3>
-              </div>
-              <div className="space-y-2 text-gray-600">
-                <div className="flex justify-between">
-                  <span>Monday - Friday:</span>
-                  <span className="font-medium">9:00 AM - 6:00 PM PST</span>
+                  <div>
+                    <Label htmlFor="message">Message *</Label>
+                    <Textarea
+                      id="message"
+                      name="message"
+                      required
+                      rows={6}
+                      value={formData.message}
+                      onChange={handleInputChange}
+                      placeholder="Tell us more about your inquiry..."
+                    />
+                  </div>
+
+                  <Button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="w-full"
+                  >
+                    {isSubmitting ? (
+                      <div className="flex items-center space-x-2">
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                        <span>Sending...</span>
+                      </div>
+                    ) : (
+                      <div className="flex items-center space-x-2">
+                        <Send className="h-4 w-4" />
+                        <span>Send Message</span>
+                      </div>
+                    )}
+                  </Button>
+                </form>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Contact Information */}
+          <div className="space-y-6">
+            {/* Quick Contact */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Get in Touch</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-center space-x-3">
+                  <Mail className="h-5 w-5 text-green-600" />
+                  <div>
+                    <p className="font-medium">Email</p>
+                    <p className="text-gray-600">support@epic360gigs.com</p>
+                  </div>
                 </div>
-                <div className="flex justify-between">
-                  <span>Saturday:</span>
-                  <span className="font-medium">10:00 AM - 4:00 PM PST</span>
+                <div className="flex items-center space-x-3">
+                  <Phone className="h-5 w-5 text-green-600" />
+                  <div>
+                    <p className="font-medium">Phone</p>
+                    <p className="text-gray-600">+1 (555) 123-4567</p>
+                  </div>
                 </div>
-                <div className="flex justify-between">
-                  <span>Sunday:</span>
-                  <span className="font-medium">Closed</span>
+                <div className="flex items-center space-x-3">
+                  <MapPin className="h-5 w-5 text-green-600" />
+                  <div>
+                    <p className="font-medium">Address</p>
+                    <p className="text-gray-600">
+                      123 Business Street
+                      <br />
+                      Suite 100
+                      <br />
+                      New York, NY 10001
+                    </p>
+                  </div>
                 </div>
-                <div className="mt-4 p-3 bg-blue-50 rounded-lg">
-                  <p className="text-sm text-blue-800">
-                    <strong>Emergency Support:</strong> Available 24/7 for critical issues via live chat
-                  </p>
+                <div className="flex items-center space-x-3">
+                  <Clock className="h-5 w-5 text-green-600" />
+                  <div>
+                    <p className="font-medium">Business Hours</p>
+                    <p className="text-gray-600">
+                      Monday - Friday: 9:00 AM - 6:00 PM EST
+                      <br />
+                      Saturday: 10:00 AM - 4:00 PM EST
+                      <br />
+                      Sunday: Closed
+                    </p>
+                  </div>
                 </div>
-              </div>
-            </div>
+              </CardContent>
+            </Card>
+
+            {/* Support Categories */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Support Categories</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <div className="flex items-center space-x-3">
+                      <Users className="h-5 w-5 text-blue-600" />
+                      <span className="font-medium">Account Issues</span>
+                    </div>
+                    <Badge variant="secondary">24h</Badge>
+                  </div>
+                  <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <div className="flex items-center space-x-3">
+                      <Shield className="h-5 w-5 text-green-600" />
+                      <span className="font-medium">Payment & Billing</span>
+                    </div>
+                    <Badge variant="secondary">2h</Badge>
+                  </div>
+                  <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <div className="flex items-center space-x-3">
+                      <Globe className="h-5 w-5 text-purple-600" />
+                      <span className="font-medium">Technical Support</span>
+                    </div>
+                    <Badge variant="secondary">4h</Badge>
+                  </div>
+                  <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <div className="flex items-center space-x-3">
+                      <Building className="h-5 w-5 text-orange-600" />
+                      <span className="font-medium">Business Inquiries</span>
+                    </div>
+                    <Badge variant="secondary">24h</Badge>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Live Chat */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Need Immediate Help?</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-gray-600 mb-4">
+                  Our live chat support is available 24/7 for urgent matters.
+                </p>
+                <Button className="w-full" variant="outline">
+                  <MessageSquare className="h-4 w-4 mr-2" />
+                  Start Live Chat
+                </Button>
+              </CardContent>
+            </Card>
           </div>
         </div>
 
-        {/* FAQ Prompt */}
-        <div className="mt-12 text-center">
-          <div className="bg-gradient-to-r from-green-600 to-blue-600 rounded-2xl p-8 text-white">
-            <h3 className="text-2xl font-bold mb-4">Looking for Quick Answers?</h3>
-            <p className="text-lg mb-6 opacity-90">
-              Check out our comprehensive FAQ section for instant solutions to common questions.
-            </p>
-            <Button variant="secondary" size="lg" className="bg-white text-gray-900 hover:bg-gray-100">
-              Browse FAQ
-            </Button>
+        {/* FAQ Section */}
+        <div className="mt-16">
+          <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center">
+            Frequently Asked Questions
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <Card>
+              <CardContent className="p-6">
+                <h3 className="font-semibold mb-2">
+                  How quickly do you respond?
+                </h3>
+                <p className="text-gray-600 text-sm">
+                  We typically respond to emails within 24 hours, and urgent
+                  matters are handled within 2-4 hours.
+                </p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-6">
+                <h3 className="font-semibold mb-2">Can I schedule a call?</h3>
+                <p className="text-gray-600 text-sm">
+                  Yes! You can schedule a consultation call with our team
+                  through our booking system.
+                </p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-6">
+                <h3 className="font-semibold mb-2">
+                  What information should I include?
+                </h3>
+                <p className="text-gray-600 text-sm">
+                  Please include your account details, order number (if
+                  applicable), and a detailed description of your issue.
+                </p>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </div>
     </div>
-  )
+  );
 }
