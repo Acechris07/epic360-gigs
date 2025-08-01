@@ -7,6 +7,26 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 export default function TestSigninPage() {
+  // Prevent access in production
+  if (process.env.NODE_ENV === 'production') {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <Card className="w-full max-w-md">
+          <CardHeader>
+            <CardTitle className="text-2xl text-center text-red-600">
+              Access Denied
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-center text-gray-600">
+              This page is only available in development mode.
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
