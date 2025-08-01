@@ -109,16 +109,70 @@ export type Database = {
           updated_at: string;
         };
       };
+      services: {
+        Row: {
+          id: string;
+          provider_id: string;
+          title: string;
+          description: string;
+          category: string;
+          subcategory: string | null;
+          price: number;
+          delivery_time: number;
+          tags: string[] | null;
+          images: string[] | null;
+          is_active: boolean;
+          views: number;
+          favorites: number;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          provider_id: string;
+          title: string;
+          description: string;
+          category: string;
+          subcategory?: string | null;
+          price: number;
+          delivery_time: number;
+          tags?: string[] | null;
+          images?: string[] | null;
+          is_active?: boolean;
+          views?: number;
+          favorites?: number;
+        };
+        Update: {
+          title?: string;
+          description?: string;
+          category?: string;
+          subcategory?: string | null;
+          price?: number;
+          delivery_time?: number;
+          tags?: string[] | null;
+          images?: string[] | null;
+          is_active?: boolean;
+          views?: number;
+          favorites?: number;
+        };
+      };
       orders: {
         Row: {
           id: string;
-          gig_id: string;
+          gig_id: string | null;
+          service_id: string | null;
           client_id: string;
           freelancer_id: string;
-          status: 'pending' | 'in_progress' | 'completed' | 'cancelled';
+          status:
+            | 'pending'
+            | 'in_progress'
+            | 'completed'
+            | 'cancelled'
+            | 'disputed';
           total_amount: number;
           requirements: string | null;
           delivery_date: string | null;
+          completed_date: string | null;
           created_at: string;
           updated_at: string;
         };

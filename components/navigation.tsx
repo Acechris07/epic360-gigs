@@ -62,12 +62,6 @@ export function Navigation() {
             {user && (
               <>
                 <Link
-                  href="/orders"
-                  className="text-gray-600 hover:text-green-600 transition-colors"
-                >
-                  My Orders
-                </Link>
-                <Link
                   href="/tracking"
                   className="text-gray-600 hover:text-green-600 transition-colors"
                 >
@@ -78,12 +72,6 @@ export function Navigation() {
                   className="text-gray-600 hover:text-green-600 transition-colors"
                 >
                   Reviews
-                </Link>
-                <Link
-                  href="/messages"
-                  className="text-gray-600 hover:text-green-600 transition-colors"
-                >
-                  Messages
                 </Link>
               </>
             )}
@@ -200,13 +188,6 @@ export function Navigation() {
                 </Link>
                 {user && (
                   <>
-                    <Link
-                      href="/orders"
-                      className="block text-gray-600 hover:text-green-600 transition-colors"
-                      onClick={() => setIsMenuOpen(false)}
-                    >
-                      My Orders
-                    </Link>
                     <Link
                       href="/tracking"
                       className="block text-gray-600 hover:text-green-600 transition-colors"
