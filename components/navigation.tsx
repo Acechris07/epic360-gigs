@@ -68,6 +68,12 @@ export function Navigation() {
                   My Orders
                 </Link>
                 <Link
+                  href="/tracking"
+                  className="text-gray-600 hover:text-green-600 transition-colors"
+                >
+                  Tracking
+                </Link>
+                <Link
                   href="/reviews"
                   className="text-gray-600 hover:text-green-600 transition-colors"
                 >
@@ -200,6 +206,13 @@ export function Navigation() {
                       onClick={() => setIsMenuOpen(false)}
                     >
                       My Orders
+                    </Link>
+                    <Link
+                      href="/tracking"
+                      className="block text-gray-600 hover:text-green-600 transition-colors"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      Tracking
                     </Link>
                     <Link
                       href="/reviews"

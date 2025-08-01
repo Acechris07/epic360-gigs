@@ -18,6 +18,7 @@ import {
 import Link from 'next/link';
 import { ReviewSystem } from '@/components/review-system';
 import { StarRating } from '@/components/star-rating';
+import { OrderTracking } from '@/components/order-tracking';
 
 interface Order {
   id: string;
@@ -244,6 +245,15 @@ export default function OrderDetailPage() {
               </CardContent>
             </Card>
           )}
+
+          {/* Order Tracking */}
+          <OrderTracking
+            orderId={order.id}
+            currentStatus={order.status}
+            isClient={isClient}
+            isFreelancer={!isClient}
+            onStatusUpdate={loadOrder}
+          />
 
           {/* Review Section */}
           {order.status === 'completed' && (
