@@ -23,6 +23,8 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
+import { FileUpload } from '@/components/ui/file-upload';
+import { BUCKETS, UploadResult } from '@/lib/upload';
 import { useAuth } from '@/lib/auth';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/lib/supabase';
@@ -70,7 +72,7 @@ export default function CreateServicePage() {
 
   const [currentTag, setCurrentTag] = useState('');
   const [loading, setLoading] = useState(false);
-  const [imageFiles, setImageFiles] = useState<File[]>([]);
+  const [uploadedImages, setUploadedImages] = useState<string[]>([]);
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -93,21 +95,36 @@ export default function CreateServicePage() {
     }));
   };
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || []);
-    if (files.length + imageFiles.length > 5) {
-      toast({
-        title: 'Too many images',
-        description: 'You can upload a maximum of 5 images.',
-        variant: 'destructive',
-      });
-      return;
-    }
-    setImageFiles(prev => [...prev, ...files]);
-  };
+  const handleImageUpload = async (files: File[]): Promise<UploadResult[]> => {
+    const formData = new FormData();
+    files.forEach(file => formData.append('files', file));
+    formData.append('bucket', BUCKETS.SERVICE_IMAGES);
+    formData.append('path', 'services');
 
-  const handleRemoveImage = (index: number) => {
-    setImageFiles(prev => prev.filter((_, i) => i !== index));
+    try {
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const result = await response.json();
+
+      if (!result.success) {
+        throw new Error(result.error?.message || 'Upload failed');
+      }
+
+      // Update uploaded images state
+      const newImageUrls = result.data.map((item: any) => item.url);
+      setUploadedImages(prev => [...prev, ...newImageUrls]);
+
+      return result.data.map((item: any) => ({
+        url: item.url,
+        path: item.path,
+      }));
+    } catch (error) {
+      console.error('Upload error:', error);
+      throw error;
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -127,17 +144,7 @@ export default function CreateServicePage() {
     setLoading(true);
 
     try {
-      // Upload images first (in a real app, you'd upload to a storage service)
-      const imageUrls: string[] = [];
-
-      // For demo purposes, we'll use placeholder URLs
-      for (let i = 0; i < imageFiles.length; i++) {
-        imageUrls.push(
-          `/placeholder.svg?height=300&width=400&text=Service+Image+${i + 1}`
-        );
-      }
-
-      // Create the service
+      // Create the service with uploaded image URLs
       const { error } = await supabase.from('services').insert({
         provider_id: user.id,
         title: formData.title,
@@ -147,7 +154,7 @@ export default function CreateServicePage() {
         price: Number.parseFloat(formData.price),
         delivery_time: Number.parseInt(formData.delivery_time),
         tags: formData.tags,
-        images: imageUrls,
+        images: uploadedImages,
         is_active: true,
       });
 
@@ -161,6 +168,7 @@ export default function CreateServicePage() {
 
       router.push('/dashboard');
     } catch (error) {
+      console.error('Error creating service:', error);
       toast({
         title: 'Error creating service',
         description: 'Please try again later.',
@@ -177,11 +185,11 @@ export default function CreateServicePage() {
         {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-4">
-            Create Your Service
+            Create a New Service
           </h1>
           <p className="text-lg text-gray-600">
-            Showcase your skills and start earning by offering your services to
-            clients worldwide
+            Showcase your skills and attract clients with a compelling service
+            listing.
           </p>
         </div>
 
@@ -189,118 +197,116 @@ export default function CreateServicePage() {
           <CardHeader>
             <CardTitle>Service Details</CardTitle>
             <CardDescription>
-              Fill in the details about the service you want to offer. Be
-              specific and highlight what makes your service unique.
+              Fill in the details below to create your service listing.
             </CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Service Title */}
-              <div className="space-y-2">
-                <Label htmlFor="title">Service Title *</Label>
-                <Input
-                  id="title"
-                  placeholder="e.g., Professional House Cleaning Service"
-                  value={formData.title}
-                  onChange={e => handleInputChange('title', e.target.value)}
-                  required
-                />
-                <p className="text-sm text-gray-500">
-                  Create a clear, descriptive title that explains what you offer
-                </p>
-              </div>
-
-              {/* Category */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="category">Category *</Label>
-                  <Select
-                    value={formData.category}
-                    onValueChange={value =>
-                      handleInputChange('category', value)
-                    }
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select a category" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {categories.map(category => (
-                        <SelectItem key={category} value={category}>
-                          {category}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="subcategory">Subcategory (Optional)</Label>
+              {/* Basic Information */}
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="title">Service Title *</Label>
                   <Input
-                    id="subcategory"
-                    placeholder="e.g., Deep Cleaning, Regular Maintenance"
-                    value={formData.subcategory}
-                    onChange={e =>
-                      handleInputChange('subcategory', e.target.value)
-                    }
+                    id="title"
+                    value={formData.title}
+                    onChange={e => handleInputChange('title', e.target.value)}
+                    placeholder="e.g., Professional House Cleaning Service"
+                    required
                   />
                 </div>
-              </div>
 
-              {/* Description */}
-              <div className="space-y-2">
-                <Label htmlFor="description">Service Description *</Label>
-                <Textarea
-                  id="description"
-                  placeholder="Describe your service in detail. What's included? What makes it special? What can clients expect?"
-                  value={formData.description}
-                  onChange={e =>
-                    handleInputChange('description', e.target.value)
-                  }
-                  rows={5}
-                  required
-                />
-                <p className="text-sm text-gray-500">
-                  Minimum 100 characters. Be detailed about what you offer and
-                  what's included.
-                </p>
-              </div>
+                <div>
+                  <Label htmlFor="description">Description *</Label>
+                  <Textarea
+                    id="description"
+                    value={formData.description}
+                    onChange={e =>
+                      handleInputChange('description', e.target.value)
+                    }
+                    placeholder="Describe your service in detail..."
+                    rows={6}
+                    required
+                  />
+                </div>
 
-              {/* Pricing and Delivery */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="price">Price (USD) *</Label>
-                  <div className="relative">
-                    <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="category">Category *</Label>
+                    <Select
+                      value={formData.category}
+                      onValueChange={value =>
+                        handleInputChange('category', value)
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select a category" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {categories.map(category => (
+                          <SelectItem key={category} value={category}>
+                            {category}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="subcategory">Subcategory</Label>
                     <Input
-                      id="price"
-                      type="number"
-                      placeholder="50"
-                      value={formData.price}
-                      onChange={e => handleInputChange('price', e.target.value)}
-                      className="pl-10"
-                      min="1"
-                      step="0.01"
-                      required
+                      id="subcategory"
+                      value={formData.subcategory}
+                      onChange={e =>
+                        handleInputChange('subcategory', e.target.value)
+                      }
+                      placeholder="e.g., Deep Cleaning, Regular Cleaning"
                     />
                   </div>
                 </div>
+              </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="delivery_time">Delivery Time (Days) *</Label>
-                  <div className="relative">
-                    <Clock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                    <Input
-                      id="delivery_time"
-                      type="number"
-                      placeholder="3"
-                      value={formData.delivery_time}
-                      onChange={e =>
-                        handleInputChange('delivery_time', e.target.value)
-                      }
-                      className="pl-10"
-                      min="1"
-                      required
-                    />
+              {/* Pricing & Delivery */}
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="price">Price (USD) *</Label>
+                    <div className="relative">
+                      <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                      <Input
+                        id="price"
+                        type="number"
+                        value={formData.price}
+                        onChange={e =>
+                          handleInputChange('price', e.target.value)
+                        }
+                        placeholder="50.00"
+                        className="pl-10"
+                        min="0.01"
+                        step="0.01"
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="delivery_time">
+                      Delivery Time (days) *
+                    </Label>
+                    <div className="relative">
+                      <Clock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                      <Input
+                        id="delivery_time"
+                        type="number"
+                        value={formData.delivery_time}
+                        onChange={e =>
+                          handleInputChange('delivery_time', e.target.value)
+                        }
+                        placeholder="3"
+                        className="pl-10"
+                        min="1"
+                        required
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
@@ -359,51 +365,32 @@ export default function CreateServicePage() {
               {/* Image Upload */}
               <div className="space-y-2">
                 <Label htmlFor="images">Service Images</Label>
-                <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
-                  <Upload className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-                  <div className="space-y-2">
-                    <p className="text-sm text-gray-600">
-                      Upload images that showcase your service
-                    </p>
-                    <input
-                      type="file"
-                      id="images"
-                      multiple
-                      accept="image/*"
-                      onChange={handleImageUpload}
-                      className="hidden"
-                    />
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => document.getElementById('images')?.click()}
-                    >
-                      Choose Images
-                    </Button>
-                    <p className="text-xs text-gray-500">
-                      Maximum 5 images, up to 10MB each
-                    </p>
-                  </div>
-                </div>
+                <FileUpload
+                  onUpload={handleImageUpload}
+                  maxFiles={5}
+                  maxSize={5 * 1024 * 1024} // 5MB
+                  allowedTypes={['image/jpeg', 'image/png', 'image/webp']}
+                  acceptedFileTypes="image/*"
+                  uploadText="Upload Images"
+                  dragText="Drag & drop service images here, or click to select"
+                />
 
-                {imageFiles.length > 0 && (
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-4">
-                    {imageFiles.map((file, index) => (
-                      <div key={index} className="relative">
-                        <img
-                          src={URL.createObjectURL(file) || '/placeholder.svg'}
-                          alt={`Service image ${index + 1}`}
-                          className="w-full h-32 object-cover rounded-lg"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => handleRemoveImage(index)}
-                          className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
-                        >
-                          <X className="h-4 w-4" />
-                        </button>
-                      </div>
-                    ))}
+                {uploadedImages.length > 0 && (
+                  <div className="mt-4">
+                    <h4 className="text-sm font-medium mb-2">
+                      Uploaded Images ({uploadedImages.length})
+                    </h4>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                      {uploadedImages.map((url, index) => (
+                        <div key={index} className="relative">
+                          <img
+                            src={url}
+                            alt={`Service image ${index + 1}`}
+                            className="w-full h-24 object-cover rounded"
+                          />
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 )}
               </div>
